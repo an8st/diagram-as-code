@@ -1,0 +1,24 @@
+@startuml
+autonumber
+actor "Пользователь" as User
+participant "Система" as System
+participant "GitLab API" as GitLab
+participant "IndexedDB" as DB
+
+User -> System : Открыть список диаграмм
+System --> User : Отобразить файлы
+
+User -> System : Нажать "Удалить"
+System --> User : Показать диалог подтверждения
+
+User -> System : Подтвердить удаление
+opt Интернет доступен
+    System -> GitLab : DELETE /projects/{id}/repository/files/{path}
+    System -> DB : Удалить из IndexedDB
+else Интернет недоступен
+    System -> DB : Пометить как 'pending-delete'
+    System --> User : "Ошибка интернет-соедиения. \nФайл будет удален при восстановлении подключения"
+end
+
+System --> User : Обновить список диаграмм
+@enduml

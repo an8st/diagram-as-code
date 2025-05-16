@@ -1,0 +1,25 @@
+
+
+@startuml
+actor "Пользователь" as User
+participant "Система" as System
+
+autonumber
+
+activate User
+User -> System : Открыть диаграмму
+activate System
+
+User -> System : Выбрать "Экспортировать"
+System --> User : Предложить выбор формата (PNG/SVG/PDF/TXT)
+User -> System : Выбрать формат
+System -> System : Сгенерировать файл в нужном формате
+
+alt Успешно     
+    System --> User : Вернуть файл, готовый для скачивания
+else Ошибка генерации
+    System --> User : Показать сообщение: "Не удалось сгенерировать файл. Повторите попытку"
+end
+
+deactivate System
+@enduml

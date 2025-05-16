@@ -1,0 +1,24 @@
+@startuml
+actor "Пользователь" as User
+participant "Система" as System
+
+autonumber
+
+activate User
+activate System
+
+User -> System : Выбрать "Импортировать файл"
+System --> User : Открыть диалог выбора файла
+User -> System : Загрузить файл
+System --> System : Проверка типа файла
+
+alt Формат поддерживается
+    System --> System : Определить тип языка (PlantUML/Mermaid/GraphViz)
+    System --> System : Добавить файл в список файлов
+    System --> User : Отобразить код в редакторе
+else Формат не поддерживается
+    System --> User : Показать ошибку: "Неподдерживаемый формат"
+end
+
+deactivate System
+@enduml

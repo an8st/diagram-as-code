@@ -1,0 +1,33 @@
+@startuml
+autonumber
+actor "Пользователь" as User
+participant "Система" as System
+participant "GitLab API" as GitLab
+participant "IndexedDB" as DB
+
+User -> System : Отркыть приложение
+System -> GitLab : GET /projects/{id}/repository/tree?path=diagrams
+
+alt Успех
+    GitLab --> System : Вернуть список файлов
+    loop Пройти по всему списку файлов
+        System -> GitLab : GET /projects/{id}/repository/files/{file_path}
+        GitLab --> System : Вернуть содержимое файла
+        System -> DB : Сохранить в IndexedDB
+        System -> DB : Запросить список диаграмм
+        DB --> System : Вернуть список
+        System --> User : Отобразить список диаграмм
+    end
+else Ошибка подключения к GitLab
+    GitLab --> System : Ошибка подключения к GitLab
+    System -> DB : Проверить содержимое хранилища
+    DB --> System : Вернуть данные
+    System --> User : Отобразить сообщение \n"Невозможно загрузить диаграммы.\nПроверьте подключение"
+end
+
+User -> System : Выбрать диаграмму
+System -> DB : Получить содержимое файла
+DB --> System : Вернуть код диаграммы
+System --> User : Открыть диаграмму в редакторе
+@enduml
+

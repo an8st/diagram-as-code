@@ -1,0 +1,18 @@
+@startuml
+autonumber
+actor "Пользователь" as User
+participant "Система" as System
+participant "IndexedDB" as DB
+
+User -> System : Нажать "Создать новый файл"
+opt Имя файла уже используется
+    System --> System : Добавить порядковый номер к названию файла
+    note right 
+    Название по умолчанию: new diagram
+    Тип по умолчанию: puml
+    end note
+end
+System --> System : Создать пустой файл
+System -> DB : Сохранить в IndexedDB   
+System --> User : Открыть файл в редакторе
+@enduml

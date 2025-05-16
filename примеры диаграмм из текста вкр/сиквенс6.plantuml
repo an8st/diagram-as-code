@@ -1,0 +1,62 @@
+@startuml
+autonumber
+actor "Пользователь" as User
+participant "Система" as System
+participant "GitLab API" as GitLab
+
+User -> System : Редактировать диаграмму
+User -> System : Нажать "Сохранить"
+
+System -> GitLab : PUT /projects/{id}/repository/files/{path}
+alt Успех (200)
+    System --> User : Файл успешно сохранён в GitLab
+else Ошибка (4xx/5xx)
+    GitLab --> System : Информация об ошибке
+    System --> User : Сообщение об ошибке:\n"Не удалось сохранить. Повторите позже"
+end
+
+@enduml
+
+
+@startuml
+autonumber
+actor "Пользователь" as User
+participant "Система" as System
+participant "IndexedDB" as DB
+
+User -> System : Ввести/изменить код диаграммы
+System -> DB : Отправить данные
+alt Успех
+    DB -> DB : Сохранить данные
+    DB --> System : Успешно сохранено
+else Ошибка
+    DB --> System : Ошибка открытия IndexedDB
+    System --> User : Сообщение об ошибке:\n"Автосохранение недоступно."
+end
+@enduml
+
+
+@startuml
+autonumber
+actor "Пользователь" as User
+participant "Система" as System
+participant "IndexedDB" as DB
+participant "GitLab API" as GitLab
+
+User -> System : Закрыть вкладку
+System --> System : Обработка события закрытия вкладки
+System -> DB : Получить данные из IndexedDB
+opt Интернет доступен
+    System -> GitLab : PUT /projects/{id}/repository/files/{path}
+    alt Успех
+        GitLab --> System : HTTP 200
+        System -> DB : Удалить данные
+    else Ошибка
+        GitLab --> System : HTTP 4xx/5xx
+        System --> User : Сообщение: "Данные остались в кэше. \nВы можете сохранить их позже"
+    end
+else Нет интернета
+    System --> User : Сообщение: "Нет подключения. \nДиаграмма сохранена локально"
+end
+@enduml
+

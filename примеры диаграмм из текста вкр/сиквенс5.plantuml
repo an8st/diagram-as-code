@@ -1,0 +1,26 @@
+@startuml
+actor "Пользователь" as User
+participant "Система" as System
+participant "Kroki.io" as Kroki
+
+autonumber
+activate User
+activate System
+User -> System : Редактировать код диаграммы
+System --> System : Сформировать запрос с параметрами:\nТип диаграммы, формат вывода, код    
+System -> Kroki : Отправить запрос GET
+activate Kroki
+alt Успешно 
+    Kroki --> System : Вернуть изображение (PNG/SVG)
+    System --> User : Отобразить изображение в интерфейсе
+else Ошибка синтаксиса
+    Kroki --> Kroki : Обнаружена ошибка синтаксиса
+    Kroki --> System : Вернуть информацию об ошибке синтаксиса
+    System --> User : Отобразить информацию в интерфейсе
+else Kroki вернул ошибку
+    Kroki --> System : Вернуть информацию об ошибке 
+    deactivate Kroki
+    System --> User : Отобразить сообщение: "Ошибка рендеринга. Попробуйте позже."
+end
+
+@enduml

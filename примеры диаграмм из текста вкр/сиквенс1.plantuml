@@ -1,0 +1,44 @@
+@startuml
+actor "Пользователь" as User
+participant "Система" as System
+participant "SSO-сервис" as SSO
+
+activate User
+User -> System : Открыть приложение
+activate System
+
+User -> System : Нажать "Войти"
+System --> User : Перенаправить на SSO
+
+User -> SSO : Ввести учетные данные
+activate SSO
+
+SSO --> SSO : Проверить учетные данные
+
+alt Учетные данные корректны
+    SSO --> User : Вернуть токен (JWT)
+    deactivate SSO
+
+    User -> System : Передать токен
+    System --> System : Проверить подпись и срок действия токена
+
+    alt Токен действителен
+        System --> System : Создать/обновить сессию
+        System --> User : Открыть главную страницу        
+    else Токен недействителен или истёк    
+        System --> User : Показать ошибку: "Ошибка авторизации"        
+    end
+  
+else Ошибка аутентификации
+    SSO --> User : Показать ошибку: "Неверный логин или пароль"
+    activate SSO
+end
+
+opt Ошибка соединения с SSO    
+    SSO --> System : Вернуть HTTP 500 / Timeout
+    deactivate SSO
+    System --> User : Показать ошибку: "Не удалось войти. Попробуйте позже."    
+end
+
+deactivate System
+@enduml

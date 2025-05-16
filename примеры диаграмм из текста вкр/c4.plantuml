@@ -1,0 +1,64 @@
+@startuml
+!include <C4/C4_Context>
+
+Person(Emp, "Сотрудник МТС", "")
+Person(Admin, "Администратор ИС", "")
+
+Enterprise_Boundary(mts, "MTS") {
+    System(DaC, "DaC Web Application", "Веб-приложение для описания диаграмм")
+    System(Git, "MTS GitLab", "Копроративный GitLab")
+    System(sso, "InternalSSO", "Авторизация и аутентификация сотрудников МТС")
+    System(obs, "Observability Platform", "Логи, события разметки Matomo")
+    System(ai, "МТС ИИ", "Корпоративный чат-бот")
+}
+
+Rel(Emp, DaC, "Использует", "HTTPS")
+Rel(DaC, Git, "Pull Push", "HTTPS")
+Rel(Emp, sso, "Авторизация", "HTTPS")
+Rel(sso, DaC, "JWT", "HTTPS")
+Rel(Admin, obs, "Использует", "HTTPS")
+Rel(DaC, obs, "Логи, события", "HTTPS")
+Rel(DaC, ai, "Запросы к ИИ", "HTTPS")
+@enduml
+
+
+@startuml
+!include <C4/C4_Component>
+
+Person(Emp, "Сотрудник МТС")
+Person(Admin, "Администратор ИС")
+
+Enterprise_Boundary(mts, "MTS") {
+    System(Git, "MTS GitLab", "Корпоративный GitLab")
+    System(sso, "InternalSSO", "Авторизация и аутентификация сотрудников МТС")
+    System_Boundary(obs, "Observability Platform") {
+        System(matomo, "Matomo", "События разметки Matomo")
+    }
+    System_Boundary(DaC, "DaC") {
+        Container(DaCF, "DaC Frontend", "React JS", "Веб-интерфейс для написания диаграмм")   
+        Container(DaCB, "DaC Backend", "Node.js", "Управление пользовательским хранилищем и интеграциями")  
+        Container(Kroki, "Kroki.io", "JS", "Open Source (MIT) движок для рендеринга диаграмм")
+    }
+    Container(Proxy, "R&D Proxy", "", "Прокси-API для запросов в МТС ИИ")
+    Container(GPT, "МТС ИИ", "", "Корпоративный чат-бот")
+}
+
+Rel_D(Emp, DaCF, "Использует", "HTTPS")
+
+Rel(DaCF, Kroki, "Рендеринг диаграмм", "API")
+Rel(DaCF, DaCB, "Использует", "API")
+Rel(DaCF, matomo, "События разметки", "HTTPS")
+
+Rel(DaCB, sso, "Использует", "OAuth 2.0")
+Rel(DaCB, Git, "Pull Push", "API")
+
+Rel(DaCB, Proxy, "Запросы к чат-боту", "HTTP")
+Rel(Proxy, GPT, "Запросы к чат-боту", "API")
+
+Rel(Admin, matomo, "Использует", "HTTPS")
+
+Lay_R(Git, Kroki)
+Lay_R(DaCB, sso)
+
+@enduml
+

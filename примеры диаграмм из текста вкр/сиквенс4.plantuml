@@ -1,0 +1,26 @@
+
+@startuml
+actor "Пользователь" as User
+participant "Система" as System
+participant "МТС ИИ" as GPT
+autonumber
+
+activate User
+activate System
+User -> System : Написать запрос в чат
+User -> System : Нажать "Отправить"
+System -> GPT : Отправить сообщение и контекст
+
+activate GPT
+GPT --> System : Вернуть ответ
+deactivate GPT
+
+System --> User : Отобразить ответ в чате
+
+opt Ошибка обработки
+    activate GPT
+    GPT --> System : Ошибка обработки запроса
+    deactivate GPT
+    System --> User : Отобразить сообщение: \n"Ошибка: не удалось получить ответ от ИИ"
+end
+@enduml
